@@ -1,14 +1,13 @@
-function chargeTickers(){
+function chargeTickers() {
     fetch("../data.json")
-        .then(function(res){
+        .then(function (res) {
             return res.json();
         })
-        .then(function(data){
+        .then(function (data) {
             localStorage.getItem("data");
-            localStorage.setItem("data",JSON.stringify(data));
+            localStorage.setItem("data", JSON.stringify(data));
         })
 }
-
 
 //* Ingreso Plataforma
 chargeTickers();
@@ -50,9 +49,14 @@ depositar.addEventListener("click", function () {
         inputPlaceholder: "Ingrese monto",
         inputValue: "",
     }).then((response) => {
-        if (response.value > 0) {
+        if (response.value > 100) {
             let suma = response.value;
             lastDisponible = actualizarDinero(suma, lastDisponible, 2);
+        } else {
+            Swal.fire({
+                icon: "warning",
+                text: "El deposito debe ser mayor a $100"
+            })
         }
     })
 });
@@ -66,14 +70,34 @@ dolarMEP.addEventListener("click", function () {
         inputPlaceholder: "Ingrese monto",
         inputValue: "",
     }).then((response) => {
-        if(response.value > (bonos[0].compra / 100)){
-            if(response.value <= parseFloat(localStorage.getItem("usermoney"))){
+        let minimo = (parseFloat(bonos[0].compra / 100));
+        console.log(minimo);
+        if (response.value > (bonos[0].compra / 100)) {
+            if (response.value <= parseFloat(localStorage.getItem("usermoney"))) {
                 let resta = response.value;
                 lastDisponible = actualizarDinero(resta, lastDisponible, 3);
+                let mep = (response.value / (parseFloat(bonos[0].compra / 100)) * (parseFloat(bonos[1].compra / 100)));
+                //console.log(mep);
+                Swal.fire({
+                    title: "Compra",
+                    html:
+                        `US$ ${mep.toFixed(2)}`,
+                    showCloseButton: true
+                })
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    text: "Dinero insuficiente"
+                })
             }
+        } else {
+            Swal.fire({
+                icon: "warning",
+                html:
+                    `Minimo de compra $ ${minimo.toFixed(2)}`
+            })
         }
     })
-
 })
 
 function actualizarDinero(deposito, lastDispo, op) {
